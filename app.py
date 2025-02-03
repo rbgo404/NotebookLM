@@ -167,10 +167,17 @@ class InferlessPythonModel:
         else:
             final_audio += audio_segment
     
-    final_audio.export("podcast.mp3", 
-                  format="mp3", 
-                  bitrate="192k",
-                  parameters=["-q:a", "0"])
+        
+    buffer = io.BytesIO()
+    final_audio.export(buffer, format="wav")
+    audio_data = buffer.getvalue()
+    base64_audio = base64.b64encode(audio_data).decode('utf-8')
+    
+    return {"generated_podcast":base64_audio}
+    # final_audio.export("podcast.mp3", 
+    #               format="mp3", 
+    #               bitrate="192k",
+    #               parameters=["-q:a", "0"])
 
   def generate_audio(self,text,voice):
     """Generate audio using ParlerTTS for Speaker 1"""
