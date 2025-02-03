@@ -23,6 +23,7 @@ from utils import extract_list_of_tuples, download_pdf, set_seed, extract_text_f
 
 class InferlessPythonModel:
   def initialize(self):
+    set_seed(seed=1526892603)
     model_id = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
     self.model_pipeline = transformers.pipeline(
                         "text-generation",

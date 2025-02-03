@@ -2,7 +2,8 @@ import torch
 from pypdf import PdfReader
 import requests
 import uuid
-
+import random
+import numpy as np
 import re
 import ast
 
