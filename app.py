@@ -235,7 +235,3 @@ class InferlessPythonModel:
     
     # Convert to AudioSegment
     return AudioSegment.from_wav(byte_io)
-
-obj = InferlessPythonModel()
-obj.initialize()
-obj.infer({"pdf_url":"https://arxiv.org/pdf/2412.19437"})
