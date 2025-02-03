@@ -147,7 +147,7 @@ class InferlessPythonModel:
     cleaned_outputs_text = re.sub(r'<think>.*?</think>', '', outputs_refine_text, flags=re.DOTALL)
     cleaned_outputs_text = re.sub(r'```python\n|```\n?', '', cleaned_outputs_text)
 
-    lists_with_tuples = extract_list_of_tuples(cleaned_text)
+    lists_with_tuples = extract_list_of_tuples(cleaned_outputs_text)
     
     generated_segments = []
     sampling_rates = []
