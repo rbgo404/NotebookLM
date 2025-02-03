@@ -1,7 +1,7 @@
 build:
   cuda_version: "12.1.1"
   system_packages:
-    - espeak-ng
+    - ffmpeg
   python_packages:
     - transformers==4.46.1
     - pypdf==5.1.0
