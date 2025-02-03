@@ -3,6 +3,34 @@ from pypdf import PdfReader
 import requests
 import uuid
 
+import re
+import ast
+
+def extract_list_of_tuples(content):
+    pattern = re.compile(r'\[.*?\]', re.DOTALL)
+    candidate_matches = pattern.finditer(content)
+    
+    valid_lists = []
+    
+    for match in candidate_matches:
+        candidate = match.group(0)
+        try:
+            # Try to safely evaluate the candidate string as a Python literal.
+            parsed_candidate = ast.literal_eval(candidate)
+        except Exception:
+            # If evaluation fails (e.g., because the string is not a valid literal), skip it.
+            continue
+        
+        # Check that the evaluated object is a list.
+        if isinstance(parsed_candidate, list):
+            # Optionally, check that every element in the list is a tuple.
+            # Adjust the tuple check as needed (e.g., checking tuple length).
+            if all(isinstance(item, tuple) for item in parsed_candidate):
+                valid_lists.append(parsed_candidate)
+    
+    return valid_lists
+
+
 def download_pdf(url):
     try:
         response = requests.get(url, stream=True)  # Stream to handle large files

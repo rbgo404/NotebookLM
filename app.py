@@ -2,7 +2,7 @@
 from typing import Optional
 from tqdm.notebook import tqdm
 import os
-# import torch
+import torch
 
 import transformers
 from accelerate import Accelerator
@@ -10,7 +10,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import re
 import ast
 from kokoro import KPipeline
-from IPython.display import display, Audio
 import soundfile as sf
 import numpy as np
 import io
@@ -145,13 +144,14 @@ class InferlessPythonModel:
 
     cleaned_text = re.sub(r'<think>.*?</think>', '', script, flags=re.DOTALL)
     cleaned_text = re.sub(r'```python\n|```\n?', '', cleaned_text)
-        
+
+    lists_with_tuples = extract_list_of_tuples(cleaned_text)
+    
     generated_segments = []
     sampling_rates = []
 
-    # Usage in the conversation loop
     final_audio = None
-    for conv in ast.literal_eval(cleaned_text):
+    for conv in lists_with_tuples:
         speaker, text = conv[0], conv[1]
         if speaker == "Speaker 1":
             audio_arr, rate = generate_speaker1_audio(text)
@@ -166,6 +166,11 @@ class InferlessPythonModel:
             final_audio = audio_segment
         else:
             final_audio += audio_segment
+    
+    final_audio.export("podcast.mp3", 
+                  format="mp3", 
+                  bitrate="192k",
+                  parameters=["-q:a", "0"])
 
   def generate_speaker1_audio(self,text):
     """Generate audio using ParlerTTS for Speaker 1"""
@@ -228,3 +233,6 @@ class InferlessPythonModel:
     
     # Convert to AudioSegment
     return AudioSegment.from_wav(byte_io)
+
+obj = InferlessPythonModel()
+obj.initialize()

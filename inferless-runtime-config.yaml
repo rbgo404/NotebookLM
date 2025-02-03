@@ -1,0 +1,16 @@
+build:
+  cuda_version: "12.1.1"
+  system_packages:
+    - espeak-ng
+  python_packages:
+    - transformers==4.46.1
+    - pypdf==5.1.0
+    - spacy==3.7.5
+    - kokoro==0.3.1
+    - soundfile==0.12.1
+    - accelerate==1.0.1
+    - pydub==0.25.1
+
+
+
+
