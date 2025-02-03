@@ -7,7 +7,7 @@ import re
 import ast
 
 def extract_list_of_tuples(content):
-    pattern = re.compile(r'\[.*?\]', re.DOTALL)
+    pattern = re.compile(r'\[\s*((?:\s*\("Speaker \d+",\s*"[^"]+"\),?\s*)+)\s*\]', re.DOTALL)
     candidate_matches = pattern.finditer(content)
     
     valid_lists = []
@@ -40,7 +40,7 @@ def download_pdf(url):
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     pdf_file.write(chunk)
-        print(f"PDF successfully downloaded: {save_path}")
+        print(f"PDF successfully downloaded")
     except requests.exceptions.RequestException as e:
         print(f"Failed to download PDF: {e}")
     
@@ -62,7 +62,7 @@ def set_seed(seed=None, seed_torch=True):
 
     print(f'Random seed {seed} has been set.')
 
-def extract_text_from_pdf(file_path: str, max_chars: int = 100000) -> Optional[str]:
+def extract_text_from_pdf(file_path: str, max_chars: int = 100000):
     try:
         with open(file_path, 'rb') as file:
             # Create PDF reader object

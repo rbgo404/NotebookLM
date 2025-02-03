@@ -18,6 +18,8 @@ from pydub import AudioSegment
 import numpy as np
 import random
 
+from utils import extract_list_of_tuples, download_pdf, set_seed, extract_text_from_pdf
+
 
 class InferlessPythonModel:
   def initialize(self):
@@ -31,7 +33,7 @@ class InferlessPythonModel:
     
     self.tts_pipeline = KPipeline(lang_code='a')
 
-    self.SYSTEM_PROMPT = """
+    self.CREATOR_PROMPT = """
                     You are a world-class podcast writer, renowned for ghostwriting for high-profile figures like Joe Rogan, Lex Fridman, Ben Shapiro, and Tim Ferriss. In an alternate universe, you’ve been responsible for scripting every word these hosts speak, as if they’re directly streaming your written lines into their minds. Your award-winning podcast writing is known for its precision, wit, and incredible narrative depth.
 
                     Your task is to generate a detailed podcast dialogue based on a provided PDF. The dialogue should be crafted word-for-word, including every “umm,” “hmmm,” and other natural speech interruptions—especially from Speaker 2. The conversation should remain engaging, realistic, and at times delightfully derailed. 
@@ -62,7 +64,7 @@ class InferlessPythonModel:
 
                     Generate the dialogue in English, ensuring every nuance of a real, dynamic podcast is captured.
                     """
-    self.SYSTEM_PROMPT_2 = """
+    self.REFINE_PROMPT = """
                         You are an international Oscar-winning screenwriter specializing in engaging dialogue and natural conversations. 
                         Your task is to transform the provided podcast transcript into an AI Text-To-Speech (TTS) friendly format, elevating it from its current basic state to professional quality.
 
@@ -119,11 +121,11 @@ class InferlessPythonModel:
     
     extracted_text = extract_text_from_pdf(pdf_name)
     messages = [
-        {"role": "system", "content": self.SYSTEM_PROMPT},
+        {"role": "system", "content": self.CREATOR_PROMPT},
         {"role": "user", "content": extracted_text},
     ]
 
-    outputs = model_pipeline(
+    outputs = self.model_pipeline(
         messages,
         max_new_tokens=8126,
         temperature=1,
@@ -132,18 +134,18 @@ class InferlessPythonModel:
     cleaned_content = re.sub(r'<think>.*?</think>', '', outputs[0]["generated_text"][-1]['content'], flags=re.DOTALL)
     
     messages = [
-        {"role": "system", "content": self.SYSTEM_PROMPT_2},
+        {"role": "system", "content": self.REFINE_PROMPT},
         {"role": "user", "content": cleaned_content},
     ]
-    outputs_2 = model_pipeline(
+    outputs_refine = self.model_pipeline(
     messages,
     max_new_tokens=8126,
     temperature=1)
 
-    script = outputs_2[0]["generated_text"][-1]['content']
+    outputs_refine_text = outputs_refine[0]["generated_text"][-1]['content']
 
-    cleaned_text = re.sub(r'<think>.*?</think>', '', script, flags=re.DOTALL)
-    cleaned_text = re.sub(r'```python\n|```\n?', '', cleaned_text)
+    cleaned_outputs_text = re.sub(r'<think>.*?</think>', '', outputs_refine_text, flags=re.DOTALL)
+    cleaned_outputs_text = re.sub(r'```python\n|```\n?', '', cleaned_outputs_text)
 
     lists_with_tuples = extract_list_of_tuples(cleaned_text)
     
@@ -236,3 +238,4 @@ class InferlessPythonModel:
 
 obj = InferlessPythonModel()
 obj.initialize()
+obj.infer({"pdf_url":"https://arxiv.org/pdf/2412.19437"})
