@@ -26,9 +26,7 @@ def extract_list_of_tuples(content):
             # Optionally, check that every element in the list is a tuple.
             # Adjust the tuple check as needed (e.g., checking tuple length).
             if all(isinstance(item, tuple) for item in parsed_candidate):
-                valid_lists.append(parsed_candidate)
-    
-    return valid_lists
+                return parsed_candidate
 
 
 def download_pdf(url):
