@@ -115,8 +115,10 @@ class InferlessPythonModel:
                         """
 
   def infer(self, inputs):
-    pdf_path = 'llm-think-too-fast.pdf'
-    extracted_text = extract_text_from_pdf(pdf_path)
+    pdf_url = inputs["pdf_url"]
+    pdf_name = download_pdf(pdf_url)
+    
+    extracted_text = extract_text_from_pdf(pdf_name)
     messages = [
         {"role": "system", "content": self.SYSTEM_PROMPT},
         {"role": "user", "content": extracted_text},
@@ -166,63 +168,63 @@ class InferlessPythonModel:
             final_audio += audio_segment
 
   def generate_speaker1_audio(self,text):
-        """Generate audio using ParlerTTS for Speaker 1"""
-        generator = self.tts_pipeline(
-            text, voice='bm_lewis', # <= change voice here
-            speed=1.2, split_pattern=r'\n+'
-        )
-        for i, (gs, ps, audio) in enumerate(generator):
-            print(i)  # i => index
-            print(gs) # gs => graphemes/text
-            print(ps) # ps => phonemes
-            # display(Audio(data=audio, rate=24000, autoplay=i==0))
-            # sf.write(f'{i}.wav', audio, 24000) # save each audio file
+    """Generate audio using ParlerTTS for Speaker 1"""
+    generator = self.tts_pipeline(
+        text, voice='bm_lewis', # <= change voice here
+        speed=1.2, split_pattern=r'\n+'
+    )
+    for i, (gs, ps, audio) in enumerate(generator):
+        print(i)  # i => index
+        print(gs) # gs => graphemes/text
+        print(ps) # ps => phonemes
+        # display(Audio(data=audio, rate=24000, autoplay=i==0))
+        # sf.write(f'{i}.wav', audio, 24000) # save each audio file
 
-        return audio, 24000
+    return audio, 24000
   
   def generate_speaker2_audio(text):
-        """Generate audio using ParlerTTS for Speaker 1"""
-        generator = self.tts_pipeline(
-            text, voice='am_michael', # <= change voice here
-            speed=1, split_pattern=r'\n+'
-        )
-        for i, (gs, ps, audio) in enumerate(generator):
-            print(i)  # i => index
-            print(gs) # gs => graphemes/text
-            print(ps) # ps => phonemes
-            # display(Audio(data=audio, rate=24000, autoplay=i==0))
-            # sf.write(f'{i}.wav', audio, 24000) # save each audio file
+    """Generate audio using ParlerTTS for Speaker 1"""
+    generator = self.tts_pipeline(
+        text, voice='am_michael', # <= change voice here
+        speed=1, split_pattern=r'\n+'
+    )
+    for i, (gs, ps, audio) in enumerate(generator):
+        print(i)  # i => index
+        print(gs) # gs => graphemes/text
+        print(ps) # ps => phonemes
+        # display(Audio(data=audio, rate=24000, autoplay=i==0))
+        # sf.write(f'{i}.wav', audio, 24000) # save each audio file
 
-        return audio, 24000
+    return audio, 24000
 
   def numpy_to_audio_segment(self,audio_arr, sampling_rate):
-        """Convert PyTorch tensor or numpy array to AudioSegment
+    """Convert PyTorch tensor or numpy array to AudioSegment
+    
+    Parameters:
+        audio_arr (torch.Tensor or np.ndarray): Input audio array
+        sampling_rate (int): Sampling rate of the audio
         
-        Parameters:
-            audio_arr (torch.Tensor or np.ndarray): Input audio array
-            sampling_rate (int): Sampling rate of the audio
-            
-        Returns:
-            AudioSegment: Converted audio segment
-        """
-        # Convert PyTorch tensor to numpy if needed
-        if isinstance(audio_arr, torch.Tensor):
-            audio_arr = audio_arr.cpu().numpy()
-        
-        # Convert to float32 if not already
-        if audio_arr.dtype != np.float32:
-            audio_arr = audio_arr.astype(np.float32)
-        
-        # Ensure the audio is in the range [-1, 1]
-        audio_arr = np.clip(audio_arr, -1, 1)
-        
-        # Convert to 16-bit PCM
-        audio_int16 = (audio_arr * 32767).astype(np.int16)
-        
-        # Create WAV file in memory
-        byte_io = io.BytesIO()
-        wavfile.write(byte_io, sampling_rate, audio_int16)
-        byte_io.seek(0)
-        
-        # Convert to AudioSegment
-        return AudioSegment.from_wav(byte_io)
+    Returns:
+        AudioSegment: Converted audio segment
+    """
+    # Convert PyTorch tensor to numpy if needed
+    if isinstance(audio_arr, torch.Tensor):
+        audio_arr = audio_arr.cpu().numpy()
+    
+    # Convert to float32 if not already
+    if audio_arr.dtype != np.float32:
+        audio_arr = audio_arr.astype(np.float32)
+    
+    # Ensure the audio is in the range [-1, 1]
+    audio_arr = np.clip(audio_arr, -1, 1)
+    
+    # Convert to 16-bit PCM
+    audio_int16 = (audio_arr * 32767).astype(np.int16)
+    
+    # Create WAV file in memory
+    byte_io = io.BytesIO()
+    wavfile.write(byte_io, sampling_rate, audio_int16)
+    byte_io.seek(0)
+    
+    # Convert to AudioSegment
+    return AudioSegment.from_wav(byte_io)

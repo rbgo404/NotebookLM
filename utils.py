@@ -1,19 +1,38 @@
 import torch
 from pypdf import PdfReader
+import requests
+import uuid
+
+def download_pdf(url):
+    try:
+        response = requests.get(url, stream=True)  # Stream to handle large files
+        response.raise_for_status()  # Raise an error for bad responses (4xx and 5xx)
+        pdf_name = f"{uuid.uuid4()}.pdf"
+        with open(pdf_name, 'wb') as pdf_file:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk:
+                    pdf_file.write(chunk)
+        print(f"PDF successfully downloaded: {save_path}")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to download PDF: {e}")
+    
+    return pdf_name
+    
+
 
 def set_seed(seed=None, seed_torch=True):
-  if seed is None:
-    seed = np.random.choice(2 ** 32)
-  random.seed(seed)
-  np.random.seed(seed)
-  if seed_torch:
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
+    if seed is None:
+      seed = np.random.choice(2 ** 32)
+    random.seed(seed)
+    np.random.seed(seed)
+    if seed_torch:
+      torch.manual_seed(seed)
+      torch.cuda.manual_seed_all(seed)
+      torch.cuda.manual_seed(seed)
+      torch.backends.cudnn.benchmark = False
+      torch.backends.cudnn.deterministic = True
 
-  print(f'Random seed {seed} has been set.')
+    print(f'Random seed {seed} has been set.')
 
 def extract_text_from_pdf(file_path: str, max_chars: int = 100000) -> Optional[str]:
     try:
