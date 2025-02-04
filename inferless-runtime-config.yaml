@@ -11,3 +11,5 @@ build:
     - soundfile==0.12.1
     - accelerate==1.0.1
     - pydub==0.25.1
+    - inferless==0.2.6
+    - pydantic==2.10.2
