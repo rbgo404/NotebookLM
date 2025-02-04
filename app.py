@@ -11,7 +11,16 @@ from pydub import AudioSegment
 import numpy as np
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
+import inferless
+from pydantic import BaseModel, Field
 
+@inferless.request
+class RequestObjects(BaseModel):
+  pdf_url: str = Field(default="https://arxiv.org/pdf/2502.01068")
+
+@inferless.response
+class ResponseObjects(BaseModel):
+  generated_podcast: str = Field(default='Test output')
 
 class InferlessPythonModel:
   def initialize(self):
@@ -107,11 +116,10 @@ class InferlessPythonModel:
                         - Return only a pure Python list of dialogue tuples, beginning and ending with square brackets [ ].
                         """
 
-  def infer(self, inputs):
-    pdf_url = inputs["pdf_url"]
-    pdf_name = download_pdf(pdf_url)
+  def infer(self, request: RequestObjects) -> ResponseObjects:
+    pdf_file = download_pdf(request.pdf_url)
     
-    extracted_text = extract_text_from_pdf(pdf_name)
+    extracted_text = extract_text_from_pdf(pdf_file)
     messages = [
         {"role": "system", "content": self.CREATOR_PROMPT},
         {"role": "user", "content": extracted_text},
@@ -164,7 +172,9 @@ class InferlessPythonModel:
     final_audio.export(buffer, format="wav")
     audio_data = buffer.getvalue()
     base64_audio = base64.b64encode(audio_data).decode('utf-8')    
-    return {"generated_podcast":base64_audio}
+    
+    generateObject = ResponseObjects(generated_podcast = base64_audio)        
+    return generateObject
 
   def generate_audio(self,text,voice):
     """Generate audio using ParlerTTS for Speaker 1"""
