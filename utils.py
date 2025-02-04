@@ -12,28 +12,20 @@ def extract_list_of_tuples(content):
     candidate_matches = pattern.finditer(content)
     
     valid_lists = []
-    
     for match in candidate_matches:
         candidate = match.group(0)
         try:
-            # Try to safely evaluate the candidate string as a Python literal.
             parsed_candidate = ast.literal_eval(candidate)
         except Exception:
-            # If evaluation fails (e.g., because the string is not a valid literal), skip it.
             continue
-        
-        # Check that the evaluated object is a list.
         if isinstance(parsed_candidate, list):
-            # Optionally, check that every element in the list is a tuple.
-            # Adjust the tuple check as needed (e.g., checking tuple length).
             if all(isinstance(item, tuple) for item in parsed_candidate):
                 return parsed_candidate
 
-
 def download_pdf(url):
     try:
-        response = requests.get(url, stream=True)  # Stream to handle large files
-        response.raise_for_status()  # Raise an error for bad responses (4xx and 5xx)
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
         pdf_name = f"{uuid.uuid4()}.pdf"
         with open(pdf_name, 'wb') as pdf_file:
             for chunk in response.iter_content(chunk_size=1024):
@@ -45,8 +37,6 @@ def download_pdf(url):
     
     return pdf_name
     
-
-
 def set_seed(seed=None, seed_torch=True):
     if seed is None:
       seed = np.random.choice(2 ** 32)
@@ -59,34 +49,21 @@ def set_seed(seed=None, seed_torch=True):
       torch.backends.cudnn.benchmark = False
       torch.backends.cudnn.deterministic = True
 
-    print(f'Random seed {seed} has been set.')
-
 def extract_text_from_pdf(file_path: str, max_chars: int = 100000):
     try:
         with open(file_path, 'rb') as file:
-            # Create PDF reader object
             pdf_reader = PdfReader(file)
-            
-            
-            # Get total number of pages
             num_pages = len(pdf_reader.pages)
-            print(f"Processing PDF with {num_pages} pages...")
-            
             extracted_text = []
             total_chars = 0
             
-            # Iterate through all pages
             for page_num in range(num_pages):
-                # Extract text from page
                 page = pdf_reader.pages[page_num]
                 text = page.extract_text()
                 
-                # Check if adding this page's text would exceed the limit
                 if total_chars + len(text) > max_chars:
-                    # Only add text up to the limit
                     remaining_chars = max_chars - total_chars
                     extracted_text.append(text[:remaining_chars])
-                    print(f"Reached {max_chars} character limit at page {page_num + 1}")
                     break
                 
                 extracted_text.append(text)
@@ -94,7 +71,6 @@ def extract_text_from_pdf(file_path: str, max_chars: int = 100000):
                 print(f"Processed page {page_num + 1}/{num_pages}")
             
             final_text = '\n'.join(extracted_text)
-            print(f"\nExtraction complete! Total characters: {len(final_text)}")
             return final_text
             
     except PyPDF2.PdfReadError:

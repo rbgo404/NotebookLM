@@ -1,27 +1,16 @@
-# from pypdf import PdfReader
-from typing import Optional
-from tqdm.notebook import tqdm
-import os
-import torch
-
-import transformers
-from accelerate import Accelerator
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import re
-import ast
-from kokoro import KPipeline
-import soundfile as sf
-import numpy as np
+from utils import extract_list_of_tuples, download_pdf, set_seed, extract_text_from_pdf
+import base64
 import io
+import torch
+import transformers
+import re
+from kokoro import KPipeline
+import numpy as np
 from scipy.io import wavfile
 from pydub import AudioSegment
 import numpy as np
-import random
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
-import base64
-
-from utils import extract_list_of_tuples, download_pdf, set_seed, extract_text_from_pdf
 
 
 class InferlessPythonModel:
@@ -34,7 +23,6 @@ class InferlessPythonModel:
                         model_kwargs={"torch_dtype": torch.bfloat16},
                         device_map="auto",
                     )
-    
     self.tts_pipeline = KPipeline(lang_code='a')
 
     self.CREATOR_PROMPT = """
@@ -175,13 +163,8 @@ class InferlessPythonModel:
     buffer = io.BytesIO()
     final_audio.export(buffer, format="wav")
     audio_data = buffer.getvalue()
-    base64_audio = base64.b64encode(audio_data).decode('utf-8')
-    
+    base64_audio = base64.b64encode(audio_data).decode('utf-8')    
     return {"generated_podcast":base64_audio}
-    # final_audio.export("podcast.mp3", 
-    #               format="mp3", 
-    #               bitrate="192k",
-    #               parameters=["-q:a", "0"])
 
   def generate_audio(self,text,voice):
     """Generate audio using ParlerTTS for Speaker 1"""
@@ -189,14 +172,10 @@ class InferlessPythonModel:
         text, voice=voice, # <= change voice here
         speed=1.2, split_pattern=r'\n+'
     )
-    for i, (gs, ps, audio) in enumerate(generator):
-        print("TTS",flush=True)  # i => index
-        # print(gs) # gs => graphemes/text
-        # print(ps) # ps => phonemes
-        # display(Audio(data=audio, rate=24000, autoplay=i==0))
-        # sf.write(f'{i}.wav', audio, 24000) # save each audio file
 
-    return audio, 24000
+    *_, last_item = generator
+
+    return last_item[2], 24000
   
   def numpy_to_audio_segment(self,audio_arr, sampling_rate):
     if isinstance(audio_arr, torch.Tensor):
