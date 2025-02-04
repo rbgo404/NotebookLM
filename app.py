@@ -127,7 +127,7 @@ class InferlessPythonModel:
 
     outputs = self.model_pipeline(
         messages,
-        max_new_tokens=8126,
+        max_new_tokens=526,
         temperature=1,
     )
 
@@ -139,7 +139,7 @@ class InferlessPythonModel:
     ]
     outputs_refine = self.model_pipeline(
     messages,
-    max_new_tokens=8126,
+    max_new_tokens=526,
     temperature=1)
 
     outputs_refine_text = outputs_refine[0]["generated_text"][-1]['content']
