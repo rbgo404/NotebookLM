@@ -25,7 +25,7 @@ class ResponseObjects(BaseModel):
 class InferlessPythonModel:
   def initialize(self):
     set_seed(seed=1526892603)
-    model_id = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    model_id = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     self.model_pipeline = transformers.pipeline(
                         "text-generation",
                         model=model_id,
@@ -146,9 +146,35 @@ class InferlessPythonModel:
 
     cleaned_outputs_text = re.sub(r'<think>.*?</think>', '', outputs_refine_text, flags=re.DOTALL)
     cleaned_outputs_text = re.sub(r'```python\n|```\n?', '', cleaned_outputs_text)
-
-    lists_with_tuples = extract_list_of_tuples(cleaned_outputs_text)
     
+    lists_with_tuples = extract_list_of_tuples(cleaned_outputs_text)
+    lists_with_tuples = [
+                          ("Speaker 1", "Welcome to the Future of AI! Today, we're unraveling the mind-blowing advancements in DeepSeek-V3, a groundbreaking model that's setting new standards in the AI world. Hold onto your seats as we dive into the technical wizardry that's redefining what's possible with language models!"),
+                          ("Speaker 2", "Whoa, that's intense! So, what's so special about DeepSeek-V3?"),
+                          ("Speaker 1", "Ah, wonderful question! DeepSeek-V3 is a massive Mixture-of-Experts, or MoE, language model packing a whopping 671 billion total parameters. But here's the kicker—it only activates 37 billion per token. It's like having a huge library but only pulling out the books you need, making it incredibly efficient."),
+                          ("Speaker 2", "That's wild! So, how does it actually work?"),
+                          ("Speaker 1", "Great question! It uses something called Multi-head Latent Attention, or MLA, to make the attention mechanism more efficient. Instead of storing all key-value pairs, it compresses them, reducing memory usage without sacrificing performance. And let's not forget the DeepSeekMoE architecture, which was validated in its predecessor, DeepSeek-V2. It's all about scaling smarter, not harder."),
+                          ("Speaker 2", "Hmm, so it's like having a team of experts, but you only call in the ones you need?"),
+                          ("Speaker 1", "Exactly! And here's where it gets even cooler. DeepSeek-V3 employs an auxiliary-loss-free strategy for load balancing. Instead of using extra losses to distribute the workload—like traditional methods—it dynamically adjusts some bias terms to balance the load. It's like traffic management without tolls!"),
+                          ("Speaker 2", "That sounds ingenious! But wait, doesn't removing those losses affect performance?"),
+                          ("Speaker 1", "Ah, a valid concern! The genius here is that by avoiding auxiliary losses, DeepSeek-V3 prevents any potential performance degradation that those losses might cause. It's a delicate dance of efficiency and power, and they nailed it."),
+                          ("Speaker 2", "Okay, but how do they actually train this beast of a model?"),
+                          ("Speaker 1", "Good question! They trained it on a cluster with 2048 NVIDIA H800 GPUs, which is like having a supercomputer in your pocket. The training framework is a marvel of optimization, featuring DualPipe for pipeline parallelism and efficient all-to-all communication. Plus, they're using FP8 training, which is a low-precision format that saves memory and speeds things up. It's like running a Formula 1 car on regular unleaded but still breaking land-speed records!"),
+                          ("Speaker 2", "Whoa, that's insane! So, how did they construct the dataset?"),
+                          ("Speaker 1", "Ah, data is the lifeblood of any AI model. DeepSeek-V3 was pre-trained on a 14.8 trillion-token dataset, with a focus on diversity. They even included mathematical and programming content, which is a big deal for models aiming to handle complex tasks. They also used a technique called Fill-in-Middle, or FIM, which helps the model better understand and predict middle tokens in a sequence. It's like giving the model X-ray vision for context!"),
+                          ("Speaker 2", "That's impressive! What about hyper-parameters?"),
+                          ("Speaker 1", "They used a learning rate scheduler that scales inversely with the model size, which is a clever way to avoid overfitting. The batch size was a hefty 8 million tokens, and they relied on the AdamW optimizer. It's like they gave the model a tailor-made suit to ensure it fits perfectly for the task at hand."),
+                          ("Speaker 2", "Wow! And what about post-training?"),
+                          ("Speaker 1", "Post-training, they subjected the model to supervised fine-tuning and reinforcement learning. They even used a reward model to guide the reinforcement learning, which helps the model's outputs align more closely with human preferences. It's like giving the model a finishing school education after its rigorous training!"),
+                          ("Speaker 2", "That's awesome! But how does it actually perform?"),
+                          ("Speaker 1", "Well, they evaluated it on a bunch of benchmarks like ALiBi, MMLU, and AlpacaEval, and it performed exceptionally well, outperforming many open-source models and even some closed-source ones in specific domains like code and math. It's like they've created a Swiss Army knife of AI models!"),
+                          ("Speaker 2", "This is mind-blowing! So, what's the takeaway for the rest of us?"),
+                          ("Speaker 1", "The takeaway is clear—DeepSeek-V3 is a testament to what's possible when you combine architectural innovation with training optimization. It's a game-changer, especially for the open-source community, proving that you don't need to be a giant tech company to create something truly groundbreaking. The future of AI is bright, and models like DeepSeek-V3 are leading the charge!"),
+                          ("Speaker 2", "Thanks for that, I'm genuinely excited to see where this goes!"),
+                          ("Speaker 1", "Join us next time for more exciting explorations into the future of AI!"),
+                          ("Speaker 2", "Bye, everyone!"),
+                          ("Speaker 1", "Keep exploring!"),
+                          ]
     generated_segments = []
     sampling_rates = []
 
